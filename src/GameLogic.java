@@ -12,7 +12,7 @@ public class GameLogic {
      * @param piece - what kind of piece to be placed on the board
      * @param spot  - placement on board
      * @param who   - The player or the AI
-     * @throws Exception - if the chosen spot isn't empty or out of range 1- 16
+     * @throws Exception - if the chosen spot is not empty or out of range 1- 16
      */
     public void placePiece(Piece piece, int spot, String who) throws Exception {
         if (spot > 0 && spot <= 16) {
