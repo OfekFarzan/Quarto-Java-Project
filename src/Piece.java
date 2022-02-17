@@ -8,12 +8,12 @@ public class Piece {
     private Color color;
     private String[] properties;
 
-    public Piece(Shape shape, Dimension size, boolean isHollow, Color color, String[] properties) {
+    public Piece(Shape shape, Dimension size, boolean isHollow, Color color) {
         this.shape = shape;
         this.size = size;
         this.isHollow = isHollow;
         this.color = color;
-        this.properties = properties;
+        this.properties = new String[4];
     }
 
     public Shape getShape() {
