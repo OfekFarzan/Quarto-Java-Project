@@ -36,10 +36,13 @@ public class GameLogic {
     public void placePiece(Piece piece, int spot, String who) throws Exception {
         int index;
         if (spot > 0 && spot <= 16) {
-            if (spot % 4 == 0)
+            if (spot % 4 == 0) {
                 this.matrix[spot / 4 - 1][spot / 4 - 1].setActionCommand(piece.getProperties().toString());
-            else
+                this.pieces[spot - 1] = null;
+            } else {
                 this.matrix[spot / 4][spot % 4 - 1].setActionCommand(piece.getProperties().toString());
+                this.pieces[spot - 1] = null;
+            }
             if (who.equals("AI"))
                 who = "Player";
             else
@@ -514,6 +517,22 @@ public class GameLogic {
                 properties[3] = property7;
                 pieces[i].setProperties(properties);
                 break;
+        }
+    }
+
+    /**
+     * The function clears the board of pieces and resets each cell of the matrix and the array of pieces
+     */
+    public void clearBoard(){
+        int i, j;
+        for (i = 0; i < 4; i++) {
+            for (j = 0; j < 4; j++) {
+                this.matrix[i][j].setActionCommand("empty");
+            }
+        }
+
+        for (i = 0; i < 16; i++) {
+            setPieces(pieces, i);
         }
     }
 
