@@ -18,8 +18,8 @@ public class GameLogic {
             }
         }
 
-        for (i = 0; i < 16 ; i++){
-            setPieces(pieces,i);
+        for (i = 0; i < 16; i++) {
+            setPieces(pieces, i);
         }
     }
 
@@ -395,12 +395,13 @@ public class GameLogic {
 
     /**
      * The function sets each piece's properties to each cell of the array of pieces
+     *
      * @param pieces - The array of pieces
-     * @param i - Index in the array of pieces
+     * @param i      - Index in the array of pieces
      */
     private void setPieces(Piece[] pieces, int i) {
         String[] properties = new String[4];
-        switch (i){
+        switch (i) {
             case 0:
                 properties[0] = property1;
                 properties[1] = property3;
