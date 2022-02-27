@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.util.Arrays;
 
 public class GameLogic {
 
@@ -11,6 +12,7 @@ public class GameLogic {
      */
     public GameLogic() {
         int i, j;
+        matrix = new JButton[4][4];
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 4; j++) {
                 this.matrix[i][j] = new JButton();
@@ -18,9 +20,14 @@ public class GameLogic {
             }
         }
 
+        pieces = new Piece[16];
         for (i = 0; i < 16; i++) {
+            pieces[i] = new Piece();
             setPieces(pieces, i);
         }
+
+        printBoard();
+        printRemainingPieces(pieces);
     }
 
     public static final int RED = 1, BLUE = 2, BIG = 3, SMALL = 4, HOLLOW = 5, FULL = 6, SQUARE = 7, CIRCLE = 8;
@@ -37,10 +44,10 @@ public class GameLogic {
         int index;
         if (spot > 0 && spot <= 16) {
             if (spot % 4 == 0) {
-                this.matrix[spot / 4 - 1][spot / 4 - 1].setActionCommand(piece.getProperties().toString());
+                this.matrix[spot / 4 - 1][spot / 4 - 1].setActionCommand(piece.getProperties());
                 this.pieces[spot - 1] = null;
             } else {
-                this.matrix[spot / 4][spot % 4 - 1].setActionCommand(piece.getProperties().toString());
+                this.matrix[spot / 4][spot % 4 - 1].setActionCommand(piece.getProperties());
                 this.pieces[spot - 1] = null;
             }
             if (who.equals("AI"))
@@ -166,7 +173,7 @@ public class GameLogic {
      * @return True if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
      * and arranged in a row, else returns False
      */
-    public boolean doneInRow(JButton[][] matrix) {
+    private boolean doneInRow(JButton[][] matrix) {
         int i, j;
         for (i = 0; i < 4; i++) {
             for (j = 1; j <= 8; j++) {
@@ -243,7 +250,7 @@ public class GameLogic {
      * @return True if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
      * and arranged in the main diagonal, else returns False
      */
-    public boolean doneInMainDiagonal(JButton[][] matrix) {
+    private boolean doneInMainDiagonal(JButton[][] matrix) {
         int i, j;
 
         for (i = 0; i < 1; i++) {
@@ -320,7 +327,7 @@ public class GameLogic {
      * @return True if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
      * and arranged in the secondary diagonal, else returns False
      */
-    public boolean doneInSecondaryDiagonal(JButton[][] matrix) {
+    private boolean doneInSecondaryDiagonal(JButton[][] matrix) {
         int i, j;
 
         for (i = 0; i < 1; i++) {
@@ -410,112 +417,112 @@ public class GameLogic {
                 properties[1] = property3;
                 properties[2] = property5;
                 properties[3] = property7;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 1:
                 properties[0] = property1;
                 properties[1] = property4;
                 properties[2] = property5;
                 properties[3] = property7;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 2:
                 properties[0] = property1;
                 properties[1] = property3;
                 properties[2] = property6;
                 properties[3] = property7;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 3:
                 properties[0] = property1;
                 properties[1] = property3;
                 properties[2] = property5;
                 properties[3] = property8;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 4:
                 properties[0] = property2;
                 properties[1] = property3;
                 properties[2] = property5;
                 properties[3] = property7;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 5:
                 properties[0] = property2;
                 properties[1] = property4;
                 properties[2] = property5;
                 properties[3] = property7;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 6:
                 properties[0] = property2;
                 properties[1] = property3;
                 properties[2] = property6;
                 properties[3] = property7;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 7:
                 properties[0] = property2;
                 properties[1] = property3;
                 properties[2] = property5;
                 properties[3] = property8;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 8:
                 properties[0] = property1;
                 properties[1] = property3;
                 properties[2] = property6;
                 properties[3] = property8;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 9:
                 properties[0] = property1;
                 properties[1] = property4;
                 properties[2] = property6;
                 properties[3] = property8;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 10:
                 properties[0] = property1;
                 properties[1] = property4;
                 properties[2] = property5;
                 properties[3] = property8;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 11:
                 properties[0] = property1;
                 properties[1] = property4;
                 properties[2] = property6;
                 properties[3] = property7;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 12:
                 properties[0] = property2;
                 properties[1] = property3;
                 properties[2] = property6;
                 properties[3] = property8;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 13:
                 properties[0] = property2;
                 properties[1] = property4;
                 properties[2] = property6;
                 properties[3] = property8;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 14:
                 properties[0] = property2;
                 properties[1] = property4;
                 properties[2] = property5;
                 properties[3] = property8;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
             case 15:
                 properties[0] = property2;
                 properties[1] = property4;
                 properties[2] = property6;
                 properties[3] = property7;
-                pieces[i].setProperties(properties);
+                pieces[i].setProperties(Arrays.toString(properties));
                 break;
         }
     }
@@ -523,7 +530,7 @@ public class GameLogic {
     /**
      * The function clears the board of pieces and resets each cell of the matrix and the array of pieces
      */
-    public void clearBoard(){
+    public void clearBoard() {
         int i, j;
         for (i = 0; i < 4; i++) {
             for (j = 0; j < 4; j++) {
@@ -536,4 +543,44 @@ public class GameLogic {
         }
     }
 
+    /**
+     * The function displays the board in the console
+     */
+    private void printBoard() {
+        int i, j, pos = 1;
+        System.out.println("The Board\n");
+        System.out.println("- - - - - - - - - - - - - - - - -");
+        for (i = 0; i < 4; i++) {
+            for (j = 0; j < 4; j++) {
+                if (pos < 10)
+                    System.out.print("|   " + pos + "   ");
+                else
+                    System.out.print("|   " + pos + "  ");
+                if (j == 3)
+                    System.out.println("|");
+                pos++;
+            }
+            System.out.println("- - - - - - - - - - - - - - - - -");
+        }
+    }
+
+    /**
+     * The function prints the properties of each remaining pieces
+     *
+     * @param pieces - The array of pieces
+     */
+    private void printRemainingPieces(Piece[] pieces) {
+        int i;
+        System.out.println("\n");
+        System.out.println("The remaining pieces are:\n");
+        try {
+            for (i = 0; i < pieces.length; i++) {
+                if (pieces[i] != null) {
+                    System.out.println((i + 1) + ". " + pieces[i].getProperties());
+                }
+            }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
 }

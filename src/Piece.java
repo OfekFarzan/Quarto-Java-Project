@@ -6,14 +6,14 @@ public class Piece {
     private Dimension size;
     private boolean isHollow;
     private Color color;
-    private String[] properties;
+    private String properties;
 
     public Piece(Shape shape, Dimension size, boolean isHollow, Color color) {
         this.shape = shape;
         this.size = size;
         this.isHollow = isHollow;
         this.color = color;
-        this.properties = new String[4];
+        this.properties = "";
     }
 
     public Shape getShape() {
@@ -48,11 +48,11 @@ public class Piece {
         this.color = color;
     }
 
-    public String[] getProperties() {
+    public String getProperties() {
         return properties;
     }
 
-    public void setProperties(String[] properties) {
+    public void setProperties(String properties) {
         this.properties = properties;
     }
 }
