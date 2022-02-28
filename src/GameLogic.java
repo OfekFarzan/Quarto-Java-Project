@@ -24,28 +24,28 @@ public class GameLogic {
 
         pieces = new Piece[16];
         for (i = 0; i < 16; i++) {
-            pieces[i] = new Piece();
+            pieces[i] = new Piece(i+1);
             setPieces(pieces, i);
         }
 
-        printBoard();
+        printBoard2();
         printRemainingPieces(pieces);
-        System.out.println("Type the id (1-16) of what piece you would like to place\n");
+        System.out.println("\nType the id (1-16) of what piece you would like to place\n");
         int id = reader.nextInt();
         System.out.println("Type the place (1-16) in which you would like to place the chosen piece\n");
         int spot = reader.nextInt();
         String who = "Player";
         while (countRemainingPieces(pieces) > 0 && !gameOver(matrix)) {
             placePiece(pieces[id], spot, who);
-            printBoard();
+            printBoard2();
             printRemainingPieces(pieces);
             System.out.println("Type the id (1-16) of what piece you would like to place\n");
             id = reader.nextInt();
             System.out.println("Type the place (1-16) in which you would like to place the chosen piece\n");
             spot = reader.nextInt();
         }
-
-        System.out.println(who + "Won");
+        printBoard2();
+        System.out.println(who + " Won");
     }
 
     private static final int RED = 1, BLUE = 2, BIG = 3, SMALL = 4, HOLLOW = 5, FULL = 6, SQUARE = 7, CIRCLE = 8;
@@ -62,10 +62,10 @@ public class GameLogic {
         int index;
         if (spot > 0 && spot <= 16) {
             if (spot % 4 == 0) {
-                this.matrix[spot / 4 - 1][spot / 4 - 1].setActionCommand(piece.getProperties());
+                this.matrix[spot / 4 - 1][spot / 4 - 1].setActionCommand(Integer.toString(piece.getId()));
                 this.pieces[spot - 1].setProperties("");
             } else {
-                this.matrix[spot / 4][spot % 4 - 1].setActionCommand(piece.getProperties());
+                this.matrix[spot / 4][spot % 4 - 1].setActionCommand(Integer.toString(piece.getId()));
                 this.pieces[spot - 1].setProperties("");
             }
             if (who.equals("AI"))
@@ -577,6 +577,20 @@ public class GameLogic {
                 if (j == 3)
                     System.out.println("|");
                 pos++;
+            }
+            System.out.println("- - - - - - - - - - - - - - - - -");
+        }
+    }
+
+    private void printBoard2() {
+        int i, j;
+        System.out.println("The Board\n");
+        System.out.println("- - - - - - - - - - - - - - - - -");
+        for (i = 0; i < 4; i++) {
+            for (j = 0; j < 4; j++) {
+                System.out.print("|   " + this.matrix[i][j].getActionCommand() + "   ");
+                if (j == 3)
+                    System.out.println("|");
             }
             System.out.println("- - - - - - - - - - - - - - - - -");
         }
