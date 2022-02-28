@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.util.Arrays;
+import java.util.*;
 
 public class GameLogic {
 
@@ -10,7 +11,8 @@ public class GameLogic {
      * Builds the JButtons matrix and initializes the action command of each cell to empty
      * Builds an array of pieces
      */
-    public GameLogic() {
+    public GameLogic() throws Exception {
+        Scanner reader = new Scanner(System.in);
         int i, j;
         matrix = new JButton[4][4];
         for (i = 0; i < 4; i++) {
@@ -28,10 +30,26 @@ public class GameLogic {
 
         printBoard();
         printRemainingPieces(pieces);
+        System.out.println("Type the id (1-16) of what piece you would like to place\n");
+        int id = reader.nextInt();
+        System.out.println("Type the place (1-16) in which you would like to place the chosen piece\n");
+        int spot = reader.nextInt();
+        String who = "Player";
+        while (countRemainingPieces(pieces) > 0 && !gameOver(matrix)) {
+            placePiece(pieces[id], spot, who);
+            printBoard();
+            printRemainingPieces(pieces);
+            System.out.println("Type the id (1-16) of what piece you would like to place\n");
+            id = reader.nextInt();
+            System.out.println("Type the place (1-16) in which you would like to place the chosen piece\n");
+            spot = reader.nextInt();
+        }
+
+        System.out.println(who + "Won");
     }
 
-    public static final int RED = 1, BLUE = 2, BIG = 3, SMALL = 4, HOLLOW = 5, FULL = 6, SQUARE = 7, CIRCLE = 8;
-    public static final String property1 = "RED", property2 = "BLUE", property3 = "BIG", property4 = "SMALL", property5 = "HOLLOW",
+    private static final int RED = 1, BLUE = 2, BIG = 3, SMALL = 4, HOLLOW = 5, FULL = 6, SQUARE = 7, CIRCLE = 8;
+    private static final String property1 = "RED", property2 = "BLUE", property3 = "BIG", property4 = "SMALL", property5 = "HOLLOW",
             property6 = "FULL", property7 = "SQUARE", property8 = "CIRCLE";
 
     /**
@@ -40,15 +58,15 @@ public class GameLogic {
      * @param who   - The player or the AI
      * @throws Exception - if the chosen spot is not empty or out of range 1- 16
      */
-    public void placePiece(Piece piece, int spot, String who) throws Exception {
+    private void placePiece(Piece piece, int spot, String who) throws Exception {
         int index;
         if (spot > 0 && spot <= 16) {
             if (spot % 4 == 0) {
                 this.matrix[spot / 4 - 1][spot / 4 - 1].setActionCommand(piece.getProperties());
-                this.pieces[spot - 1] = null;
+                this.pieces[spot - 1].setProperties("");
             } else {
                 this.matrix[spot / 4][spot % 4 - 1].setActionCommand(piece.getProperties());
-                this.pieces[spot - 1] = null;
+                this.pieces[spot - 1].setProperties("");
             }
             if (who.equals("AI"))
                 who = "Player";
@@ -74,7 +92,7 @@ public class GameLogic {
      * @param spot
      * @return True if the chosen spot of the matrix (1-16) is empty,else returns False
      */
-    public boolean isSpotEmpty(int spot) {
+    private boolean isSpotEmpty(int spot) {
         if (spot % 4 == 0) {
             return this.matrix[spot / 4 - 1][spot / 4 - 1].getActionCommand().equals("empty");
         }
@@ -87,7 +105,7 @@ public class GameLogic {
      * and arranged in the main diagonal or the secondary diagonal or in a row or in a column of the matrix, else returns False
      */
 
-    public boolean gameOver(JButton[][] matrix) {
+    private boolean gameOver(JButton[][] matrix) {
         return doneInColumn(this.matrix) || doneInMainDiagonal(this.matrix) || doneInRow(this.matrix) || doneInSecondaryDiagonal(this.matrix);
     }
 
@@ -96,7 +114,7 @@ public class GameLogic {
      * @return True if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
      * and arranged in a column, else returns False
      */
-    public boolean doneInColumn(JButton[][] matrix) {
+    private boolean doneInColumn(JButton[][] matrix) {
         int i, j;
 
         for (i = 0; i < 4; i++) {
@@ -563,6 +581,21 @@ public class GameLogic {
             System.out.println("- - - - - - - - - - - - - - - - -");
         }
     }
+
+    /**
+     * The function counts how many pieces remaining
+     *
+     * @param pieces - The array of pieces
+     * @return - amount of remaining pieces
+     */
+    private int countRemainingPieces(Piece[] pieces) {
+        int i, count = 0;
+        for (i = 0; i < pieces.length; i++) {
+            if (pieces[i].getProperties().equals("")) count++;
+        }
+        return count;
+    }
+
 
     /**
      * The function prints the properties of each remaining pieces
