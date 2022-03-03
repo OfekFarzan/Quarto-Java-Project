@@ -28,6 +28,7 @@ public class GameLogic {
             setPieces(pieces, i);
         }
 
+
         printBoard2();
         printRemainingPieces(pieces);
         System.out.println("\nType the id (1-16) of what piece you would like to place\n");
@@ -35,11 +36,15 @@ public class GameLogic {
         System.out.println("Type the place (1-16) in which you would like to place the chosen piece\n");
         int spot = reader.nextInt();
         String who = "Player";
-        while (countRemainingPieces(pieces) > 0 && !gameOver(matrix)) {
-            placePiece(pieces[id], spot, who);
+        printBoard2();
+        placePiece(pieces[id-1], spot, who);
+        printBoard2();
+        printRemainingPieces(pieces);
+        while (countRemainingPieces(pieces) > 0 ) {
+            placePiece(pieces[id-1], spot, who);
             printBoard2();
             printRemainingPieces(pieces);
-            System.out.println("Type the id (1-16) of what piece you would like to place\n");
+            System.out.println("\nType the id (1-16) of what piece you would like to place\n");
             id = reader.nextInt();
             System.out.println("Type the place (1-16) in which you would like to place the chosen piece\n");
             spot = reader.nextInt();
@@ -63,22 +68,17 @@ public class GameLogic {
         if (spot > 0 && spot <= 16) {
             if (spot % 4 == 0) {
                 this.matrix[spot / 4 - 1][spot / 4 - 1].setActionCommand(Integer.toString(piece.getId()));
-                this.pieces[spot - 1].setProperties("");
+                this.pieces[piece.getId() - 1].setProperties("");
             } else {
                 this.matrix[spot / 4][spot % 4 - 1].setActionCommand(Integer.toString(piece.getId()));
-                this.pieces[spot - 1].setProperties("");
+                this.pieces[piece.getId() - 1].setProperties("");
             }
             if (who.equals("AI"))
                 who = "Player";
             else
                 who = "AI";
-            this.pieces[spot - 1] = null;
-            for (index = 0; index < 16; index++) {
-                if (pieces[index].getProperties().equals(piece.getProperties())) {
-                    pieces[index] = null;
-                    break;
-                }
-            }
+
+
 
         } else if (!isSpotEmpty(spot))
             throw new Exception("The chosen spot is not empty");
@@ -195,6 +195,11 @@ public class GameLogic {
         int i, j;
         for (i = 0; i < 4; i++) {
             for (j = 1; j <= 8; j++) {
+                if (this.matrix[i][i].getActionCommand().equals("empty") &&
+                        this.matrix[i][1].getActionCommand().equals("empty") &&
+                        this.matrix[i][2].getActionCommand().equals("empty") &&
+                        this.matrix[i][3].getActionCommand().equals("empty"))
+                    return false;
                 switch (j) {
                     case RED:
                         if (this.matrix[i][i].getActionCommand().equals(property1) &&
@@ -273,6 +278,11 @@ public class GameLogic {
 
         for (i = 0; i < 1; i++) {
             for (j = 1; j <= 8; j++) {
+                if (this.matrix[i][i].getActionCommand().equals("empty") &&
+                        this.matrix[1][1].getActionCommand().equals("empty") &&
+                        this.matrix[2][2].getActionCommand().equals("empty") &&
+                        this.matrix[3][3].getActionCommand().equals("empty"))
+                    return false;
                 switch (j) {
                     case RED:
                         if (this.matrix[i][i].getActionCommand().equals(property1) &&
@@ -350,6 +360,11 @@ public class GameLogic {
 
         for (i = 0; i < 1; i++) {
             for (j = 1; j <= 8; j++) {
+                if (this.matrix[i][3].getActionCommand().equals("empty") &&
+                        this.matrix[1][2].getActionCommand().equals("empty") &&
+                        this.matrix[2][1].getActionCommand().equals("empty") &&
+                        this.matrix[3][i].getActionCommand().equals("empty"))
+                    return true;
                 switch (j) {
                     case RED:
                         if (this.matrix[i][3].getActionCommand().equals(property1) &&
@@ -605,7 +620,7 @@ public class GameLogic {
     private int countRemainingPieces(Piece[] pieces) {
         int i, count = 0;
         for (i = 0; i < pieces.length; i++) {
-            if (pieces[i].getProperties().equals("")) count++;
+            if (pieces[i].getProperties().equals("") || pieces[i] == null) count++;
         }
         return count;
     }
