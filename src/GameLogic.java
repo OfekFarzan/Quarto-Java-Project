@@ -1,648 +1,267 @@
-import javax.swing.*;
+
 import java.util.Arrays;
-import java.util.*;
 
-public class GameLogic {
 
-    private JButton[][] matrix;
-    private Piece[] pieces;
+public class GameLogic implements Cloneable{
 
+    // Initializing the board
+    private int[] board = {16, 16, 16, 16,
+                           16, 16, 16, 16,
+                           16, 16, 16, 16,
+                           16, 16, 16, 16};
+
+    private int[] pieceState = new int[16];      // piece status, initially all zero
+
+    // Initializing the number of remaining spots, pieces and pieces that can be passed
+    private int nRemSpots = 16;
+    private int nRemPieces = 16;
+    private int passedPiece = 16;
+
+    public static final int OFF_BOARD = 0, IN_LIMBO = 1, IN_PLAY = 2;   // codes for pieceState
+
+    public GameLogic() {
+    }
+
+    @Override
     /**
-     * Builds the JButtons matrix and initializes the action command of each cell to empty
-     * Builds an array of pieces
+     * Clones the board and the piece status
      */
-    public GameLogic() throws Exception {
-        Scanner reader = new Scanner(System.in);
-        int i, j;
-        matrix = new JButton[4][4];
-        for (i = 0; i < 4; i++) {
-            for (j = 0; j < 4; j++) {
-                this.matrix[i][j] = new JButton();
-                this.matrix[i][j].setActionCommand("empty");
-            }
-        }
+    public Object clone() {
+        // deep copy clone
 
-        pieces = new Piece[16];
-        for (i = 0; i < 16; i++) {
-            pieces[i] = new Piece(i+1);
-            setPieces(pieces, i);
-        }
+        GameLogic c = null;
 
-
-        printBoard2();
-        printRemainingPieces(pieces);
-        System.out.println("\nType the id (1-16) of what piece you would like to place\n");
-        int id = reader.nextInt();
-        System.out.println("Type the place (1-16) in which you would like to place the chosen piece\n");
-        int spot = reader.nextInt();
-        String who = "Player";
-        printBoard2();
-        placePiece(pieces[id-1], spot, who);
-        printBoard2();
-        printRemainingPieces(pieces);
-        while (countRemainingPieces(pieces) > 0 ) {
-            placePiece(pieces[id-1], spot, who);
-            printBoard2();
-            printRemainingPieces(pieces);
-            System.out.println("\nType the id (1-16) of what piece you would like to place\n");
-            id = reader.nextInt();
-            System.out.println("Type the place (1-16) in which you would like to place the chosen piece\n");
-            spot = reader.nextInt();
-        }
-        printBoard2();
-        System.out.println(who + " Won");
-    }
-
-    private static final int RED = 1, BLUE = 2, BIG = 3, SMALL = 4, HOLLOW = 5, FULL = 6, SQUARE = 7, CIRCLE = 8;
-    private static final String property1 = "RED", property2 = "BLUE", property3 = "BIG", property4 = "SMALL", property5 = "HOLLOW",
-            property6 = "FULL", property7 = "SQUARE", property8 = "CIRCLE";
-
-    /**
-     * @param piece - what kind of piece to be placed on the board
-     * @param spot  - placement on board
-     * @param who   - The player or the AI
-     * @throws Exception - if the chosen spot is not empty or out of range 1- 16
-     */
-    private void placePiece(Piece piece, int spot, String who) throws Exception {
-        int index;
-        if (spot > 0 && spot <= 16) {
-            if (spot % 4 == 0) {
-                this.matrix[spot / 4 - 1][spot / 4 - 1].setActionCommand(Integer.toString(piece.getId()));
-                this.pieces[piece.getId() - 1].setProperties("");
-            } else {
-                this.matrix[spot / 4][spot % 4 - 1].setActionCommand(Integer.toString(piece.getId()));
-                this.pieces[piece.getId() - 1].setProperties("");
-            }
-            if (who.equals("AI"))
-                who = "Player";
-            else
-                who = "AI";
-
-
-
-        } else if (!isSpotEmpty(spot))
-            throw new Exception("The chosen spot is not empty");
-        else
-            throw new Exception("The chosen spot is out of range");
-
-
-    }
-
-    /**
-     * @param spot
-     * @return True if the chosen spot of the matrix (1-16) is empty,else returns False
-     */
-    private boolean isSpotEmpty(int spot) {
-        if (spot % 4 == 0) {
-            return this.matrix[spot / 4 - 1][spot / 4 - 1].getActionCommand().equals("empty");
-        }
-        return this.matrix[spot / 4][spot % 4 - 1].getActionCommand().equals("empty");
-    }
-
-    /**
-     * @param matrix
-     * @return True - GAME OVER if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
-     * and arranged in the main diagonal or the secondary diagonal or in a row or in a column of the matrix, else returns False
-     */
-
-    private boolean gameOver(JButton[][] matrix) {
-        return doneInColumn(this.matrix) || doneInMainDiagonal(this.matrix) || doneInRow(this.matrix) || doneInSecondaryDiagonal(this.matrix);
-    }
-
-    /**
-     * @param matrix
-     * @return True if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
-     * and arranged in a column, else returns False
-     */
-    private boolean doneInColumn(JButton[][] matrix) {
-        int i, j;
-
-        for (i = 0; i < 4; i++) {
-            for (j = 1; j <= 8; j++) {
-                switch (j) {
-                    case RED:
-                        if (this.matrix[i][i].getActionCommand().equals(property1) &&
-                                this.matrix[1][i].getActionCommand().equals(property1) &&
-                                this.matrix[2][i].getActionCommand().equals(property1) &&
-                                this.matrix[3][i].getActionCommand().equals(property1))
-                            return true;
-                        break;
-                    case BLUE:
-                        if (this.matrix[i][i].getActionCommand().equals(property2) &&
-                                this.matrix[1][i].getActionCommand().equals(property2) &&
-                                this.matrix[2][i].getActionCommand().equals(property2) &&
-                                this.matrix[3][i].getActionCommand().equals(property2))
-                            return true;
-                        break;
-                    case BIG:
-                        if (this.matrix[i][i].getActionCommand().equals(property3) &&
-                                this.matrix[1][i].getActionCommand().equals(property3) &&
-                                this.matrix[2][i].getActionCommand().equals(property3) &&
-                                this.matrix[3][i].getActionCommand().equals(property3))
-                            return true;
-                        break;
-                    case SMALL:
-                        if (this.matrix[i][i].getActionCommand().equals(property4) &&
-                                this.matrix[1][i].getActionCommand().equals(property4) &&
-                                this.matrix[2][i].getActionCommand().equals(property4) &&
-                                this.matrix[3][i].getActionCommand().equals(property4))
-                            return true;
-                        break;
-                    case HOLLOW:
-                        if (this.matrix[i][i].getActionCommand().equals(property5) &&
-                                this.matrix[1][i].getActionCommand().equals(property5) &&
-                                this.matrix[2][i].getActionCommand().equals(property5) &&
-                                this.matrix[3][i].getActionCommand().equals(property5))
-                            return true;
-                        break;
-                    case FULL:
-                        if (this.matrix[i][i].getActionCommand().equals(property6) &&
-                                this.matrix[1][i].getActionCommand().equals(property6) &&
-                                this.matrix[2][i].getActionCommand().equals(property6) &&
-                                this.matrix[3][i].getActionCommand().equals(property6))
-                            return true;
-                        break;
-                    case SQUARE:
-                        if (this.matrix[i][i].getActionCommand().equals(property7) &&
-                                this.matrix[1][i].getActionCommand().equals(property7) &&
-                                this.matrix[2][i].getActionCommand().equals(property7) &&
-                                this.matrix[3][i].getActionCommand().equals(property7))
-                            return true;
-                        break;
-                    case CIRCLE:
-                        if (this.matrix[i][i].getActionCommand().equals(property8) &&
-                                this.matrix[1][i].getActionCommand().equals(property8) &&
-                                this.matrix[2][i].getActionCommand().equals(property8) &&
-                                this.matrix[3][i].getActionCommand().equals(property8))
-                            return true;
-                        break;
-                    default:
-
-                        throw new IllegalStateException("Unexpected value: " + j);
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param matrix
-     * @return True if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
-     * and arranged in a row, else returns False
-     */
-    private boolean doneInRow(JButton[][] matrix) {
-        int i, j;
-        for (i = 0; i < 4; i++) {
-            for (j = 1; j <= 8; j++) {
-                if (this.matrix[i][i].getActionCommand().equals("empty") &&
-                        this.matrix[i][1].getActionCommand().equals("empty") &&
-                        this.matrix[i][2].getActionCommand().equals("empty") &&
-                        this.matrix[i][3].getActionCommand().equals("empty"))
-                    return false;
-                switch (j) {
-                    case RED:
-                        if (this.matrix[i][i].getActionCommand().equals(property1) &&
-                                this.matrix[i][1].getActionCommand().equals(property1) &&
-                                this.matrix[i][2].getActionCommand().equals(property1) &&
-                                this.matrix[i][3].getActionCommand().equals(property1))
-                            return true;
-                        break;
-                    case BLUE:
-                        if (this.matrix[i][i].getActionCommand().equals(property2) &&
-                                this.matrix[i][1].getActionCommand().equals(property2) &&
-                                this.matrix[i][2].getActionCommand().equals(property2) &&
-                                this.matrix[i][3].getActionCommand().equals(property2))
-                            return true;
-                        break;
-                    case BIG:
-                        if (this.matrix[i][i].getActionCommand().equals(property3) &&
-                                this.matrix[i][1].getActionCommand().equals(property3) &&
-                                this.matrix[i][2].getActionCommand().equals(property3) &&
-                                this.matrix[i][3].getActionCommand().equals(property3))
-                            return true;
-                        break;
-                    case SMALL:
-                        if (this.matrix[i][i].getActionCommand().equals(property4) &&
-                                this.matrix[i][1].getActionCommand().equals(property4) &&
-                                this.matrix[i][2].getActionCommand().equals(property4) &&
-                                this.matrix[i][3].getActionCommand().equals(property4))
-                            return true;
-                        break;
-                    case HOLLOW:
-                        if (this.matrix[i][i].getActionCommand().equals(property5) &&
-                                this.matrix[i][1].getActionCommand().equals(property5) &&
-                                this.matrix[i][2].getActionCommand().equals(property5) &&
-                                this.matrix[i][3].getActionCommand().equals(property5))
-                            return true;
-                        break;
-                    case FULL:
-                        if (this.matrix[i][i].getActionCommand().equals(property6) &&
-                                this.matrix[i][1].getActionCommand().equals(property6) &&
-                                this.matrix[i][2].getActionCommand().equals(property6) &&
-                                this.matrix[i][3].getActionCommand().equals(property6))
-                            return true;
-                        break;
-                    case SQUARE:
-                        if (this.matrix[i][i].getActionCommand().equals(property7) &&
-                                this.matrix[i][1].getActionCommand().equals(property7) &&
-                                this.matrix[i][2].getActionCommand().equals(property7) &&
-                                this.matrix[i][3].getActionCommand().equals(property7))
-                            return true;
-                        break;
-                    case CIRCLE:
-                        if (this.matrix[i][i].getActionCommand().equals(property8) &&
-                                this.matrix[i][1].getActionCommand().equals(property8) &&
-                                this.matrix[i][2].getActionCommand().equals(property8) &&
-                                this.matrix[i][3].getActionCommand().equals(property8))
-                            return true;
-                        break;
-                    default:
-
-                        throw new IllegalStateException("Unexpected value: " + j);
-                }
-            }
-        }
-
-        return false;
-    }
-
-
-    /**
-     * @param matrix
-     * @return True if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
-     * and arranged in the main diagonal, else returns False
-     */
-    private boolean doneInMainDiagonal(JButton[][] matrix) {
-        int i, j;
-
-        for (i = 0; i < 1; i++) {
-            for (j = 1; j <= 8; j++) {
-                if (this.matrix[i][i].getActionCommand().equals("empty") &&
-                        this.matrix[1][1].getActionCommand().equals("empty") &&
-                        this.matrix[2][2].getActionCommand().equals("empty") &&
-                        this.matrix[3][3].getActionCommand().equals("empty"))
-                    return false;
-                switch (j) {
-                    case RED:
-                        if (this.matrix[i][i].getActionCommand().equals(property1) &&
-                                this.matrix[1][1].getActionCommand().equals(property1) &&
-                                this.matrix[2][2].getActionCommand().equals(property1) &&
-                                this.matrix[3][3].getActionCommand().equals(property1))
-                            return true;
-                        break;
-                    case BLUE:
-                        if (this.matrix[i][i].getActionCommand().equals(property2) &&
-                                this.matrix[1][1].getActionCommand().equals(property2) &&
-                                this.matrix[2][2].getActionCommand().equals(property2) &&
-                                this.matrix[3][3].getActionCommand().equals(property2))
-                            return true;
-                        break;
-                    case BIG:
-                        if (this.matrix[i][i].getActionCommand().equals(property3) &&
-                                this.matrix[1][1].getActionCommand().equals(property3) &&
-                                this.matrix[2][2].getActionCommand().equals(property3) &&
-                                this.matrix[3][3].getActionCommand().equals(property3))
-                            return true;
-                        break;
-                    case SMALL:
-                        if (this.matrix[i][i].getActionCommand().equals(property4) &&
-                                this.matrix[1][1].getActionCommand().equals(property4) &&
-                                this.matrix[2][2].getActionCommand().equals(property4) &&
-                                this.matrix[3][3].getActionCommand().equals(property4))
-                            return true;
-                        break;
-                    case HOLLOW:
-                        if (this.matrix[i][i].getActionCommand().equals(property5) &&
-                                this.matrix[1][1].getActionCommand().equals(property5) &&
-                                this.matrix[2][2].getActionCommand().equals(property5) &&
-                                this.matrix[3][3].getActionCommand().equals(property5))
-                            return true;
-                        break;
-                    case FULL:
-                        if (this.matrix[i][i].getActionCommand().equals(property6) &&
-                                this.matrix[1][1].getActionCommand().equals(property6) &&
-                                this.matrix[2][2].getActionCommand().equals(property6) &&
-                                this.matrix[3][3].getActionCommand().equals(property6))
-                            return true;
-                        break;
-                    case SQUARE:
-                        if (this.matrix[i][i].getActionCommand().equals(property7) &&
-                                this.matrix[1][1].getActionCommand().equals(property7) &&
-                                this.matrix[2][2].getActionCommand().equals(property7) &&
-                                this.matrix[3][3].getActionCommand().equals(property7))
-                            return true;
-                        break;
-                    case CIRCLE:
-                        if (this.matrix[i][i].getActionCommand().equals(property8) &&
-                                this.matrix[1][1].getActionCommand().equals(property8) &&
-                                this.matrix[2][2].getActionCommand().equals(property8) &&
-                                this.matrix[3][3].getActionCommand().equals(property8))
-                            return true;
-                        break;
-                    default:
-
-                        throw new IllegalStateException("Unexpected value: " + j);
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param matrix
-     * @return True if there is a case on the matrix-board in which there are 4 pieces with at least 1 common property
-     * and arranged in the secondary diagonal, else returns False
-     */
-    private boolean doneInSecondaryDiagonal(JButton[][] matrix) {
-        int i, j;
-
-        for (i = 0; i < 1; i++) {
-            for (j = 1; j <= 8; j++) {
-                if (this.matrix[i][3].getActionCommand().equals("empty") &&
-                        this.matrix[1][2].getActionCommand().equals("empty") &&
-                        this.matrix[2][1].getActionCommand().equals("empty") &&
-                        this.matrix[3][i].getActionCommand().equals("empty"))
-                    return true;
-                switch (j) {
-                    case RED:
-                        if (this.matrix[i][3].getActionCommand().equals(property1) &&
-                                this.matrix[1][2].getActionCommand().equals(property1) &&
-                                this.matrix[2][1].getActionCommand().equals(property1) &&
-                                this.matrix[3][i].getActionCommand().equals(property1))
-                            return true;
-                        break;
-                    case BLUE:
-                        if (this.matrix[i][3].getActionCommand().equals(property2) &&
-                                this.matrix[1][2].getActionCommand().equals(property2) &&
-                                this.matrix[2][1].getActionCommand().equals(property2) &&
-                                this.matrix[3][i].getActionCommand().equals(property2))
-                            return true;
-                        break;
-                    case BIG:
-                        if (this.matrix[i][3].getActionCommand().equals(property3) &&
-                                this.matrix[1][2].getActionCommand().equals(property3) &&
-                                this.matrix[2][1].getActionCommand().equals(property3) &&
-                                this.matrix[3][i].getActionCommand().equals(property3))
-                            return true;
-                        break;
-                    case SMALL:
-                        if (this.matrix[i][3].getActionCommand().equals(property4) &&
-                                this.matrix[1][2].getActionCommand().equals(property4) &&
-                                this.matrix[2][1].getActionCommand().equals(property4) &&
-                                this.matrix[3][i].getActionCommand().equals(property4))
-                            return true;
-                        break;
-                    case HOLLOW:
-                        if (this.matrix[i][3].getActionCommand().equals(property5) &&
-                                this.matrix[1][2].getActionCommand().equals(property5) &&
-                                this.matrix[2][1].getActionCommand().equals(property5) &&
-                                this.matrix[3][i].getActionCommand().equals(property5))
-                            return true;
-                        break;
-                    case FULL:
-                        if (this.matrix[i][3].getActionCommand().equals(property6) &&
-                                this.matrix[1][2].getActionCommand().equals(property6) &&
-                                this.matrix[2][1].getActionCommand().equals(property6) &&
-                                this.matrix[3][i].getActionCommand().equals(property6))
-                            return true;
-                        break;
-                    case SQUARE:
-                        if (this.matrix[i][3].getActionCommand().equals(property7) &&
-                                this.matrix[1][2].getActionCommand().equals(property7) &&
-                                this.matrix[2][1].getActionCommand().equals(property7) &&
-                                this.matrix[3][i].getActionCommand().equals(property7))
-                            return true;
-                        break;
-                    case CIRCLE:
-                        if (this.matrix[i][3].getActionCommand().equals(property8) &&
-                                this.matrix[1][2].getActionCommand().equals(property8) &&
-                                this.matrix[2][1].getActionCommand().equals(property8) &&
-                                this.matrix[3][i].getActionCommand().equals(property8))
-                            return true;
-                        break;
-                    default:
-
-                        throw new IllegalStateException("Unexpected value: " + j);
-                }
-            }
-        }
-
-        return false;
-    }
-
-    public Piece[] getPieces() {
-        return pieces;
-    }
-
-    /**
-     * The function sets each piece's properties to each cell of the array of pieces
-     *
-     * @param pieces - The array of pieces
-     * @param i      - Index in the array of pieces
-     */
-    private void setPieces(Piece[] pieces, int i) {
-        String[] properties = new String[4];
-        switch (i) {
-            case 0:
-                properties[0] = property1;
-                properties[1] = property3;
-                properties[2] = property5;
-                properties[3] = property7;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 1:
-                properties[0] = property1;
-                properties[1] = property4;
-                properties[2] = property5;
-                properties[3] = property7;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 2:
-                properties[0] = property1;
-                properties[1] = property3;
-                properties[2] = property6;
-                properties[3] = property7;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 3:
-                properties[0] = property1;
-                properties[1] = property3;
-                properties[2] = property5;
-                properties[3] = property8;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 4:
-                properties[0] = property2;
-                properties[1] = property3;
-                properties[2] = property5;
-                properties[3] = property7;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 5:
-                properties[0] = property2;
-                properties[1] = property4;
-                properties[2] = property5;
-                properties[3] = property7;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 6:
-                properties[0] = property2;
-                properties[1] = property3;
-                properties[2] = property6;
-                properties[3] = property7;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 7:
-                properties[0] = property2;
-                properties[1] = property3;
-                properties[2] = property5;
-                properties[3] = property8;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 8:
-                properties[0] = property1;
-                properties[1] = property3;
-                properties[2] = property6;
-                properties[3] = property8;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 9:
-                properties[0] = property1;
-                properties[1] = property4;
-                properties[2] = property6;
-                properties[3] = property8;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 10:
-                properties[0] = property1;
-                properties[1] = property4;
-                properties[2] = property5;
-                properties[3] = property8;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 11:
-                properties[0] = property1;
-                properties[1] = property4;
-                properties[2] = property6;
-                properties[3] = property7;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 12:
-                properties[0] = property2;
-                properties[1] = property3;
-                properties[2] = property6;
-                properties[3] = property8;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 13:
-                properties[0] = property2;
-                properties[1] = property4;
-                properties[2] = property6;
-                properties[3] = property8;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 14:
-                properties[0] = property2;
-                properties[1] = property4;
-                properties[2] = property5;
-                properties[3] = property8;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-            case 15:
-                properties[0] = property2;
-                properties[1] = property4;
-                properties[2] = property6;
-                properties[3] = property7;
-                pieces[i].setProperties(Arrays.toString(properties));
-                break;
-        }
-    }
-
-    /**
-     * The function clears the board of pieces and resets each cell of the matrix and the array of pieces
-     */
-    public void clearBoard() {
-        int i, j;
-        for (i = 0; i < 4; i++) {
-            for (j = 0; j < 4; j++) {
-                this.matrix[i][j].setActionCommand("empty");
-            }
-        }
-
-        for (i = 0; i < 16; i++) {
-            setPieces(pieces, i);
-        }
-    }
-
-    /**
-     * The function displays the board in the console
-     */
-    private void printBoard() {
-        int i, j, pos = 1;
-        System.out.println("The Board\n");
-        System.out.println("- - - - - - - - - - - - - - - - -");
-        for (i = 0; i < 4; i++) {
-            for (j = 0; j < 4; j++) {
-                if (pos < 10)
-                    System.out.print("|   " + pos + "   ");
-                else
-                    System.out.print("|   " + pos + "  ");
-                if (j == 3)
-                    System.out.println("|");
-                pos++;
-            }
-            System.out.println("- - - - - - - - - - - - - - - - -");
-        }
-    }
-
-    private void printBoard2() {
-        int i, j;
-        System.out.println("The Board\n");
-        System.out.println("- - - - - - - - - - - - - - - - -");
-        for (i = 0; i < 4; i++) {
-            for (j = 0; j < 4; j++) {
-                System.out.print("|   " + this.matrix[i][j].getActionCommand() + "   ");
-                if (j == 3)
-                    System.out.println("|");
-            }
-            System.out.println("- - - - - - - - - - - - - - - - -");
-        }
-    }
-
-    /**
-     * The function counts how many pieces remaining
-     *
-     * @param pieces - The array of pieces
-     * @return - amount of remaining pieces
-     */
-    private int countRemainingPieces(Piece[] pieces) {
-        int i, count = 0;
-        for (i = 0; i < pieces.length; i++) {
-            if (pieces[i].getProperties().equals("") || pieces[i] == null) count++;
-        }
-        return count;
-    }
-
-
-    /**
-     * The function prints the properties of each remaining pieces
-     *
-     * @param pieces - The array of pieces
-     */
-    private void printRemainingPieces(Piece[] pieces) {
-        int i;
-        System.out.println("\n");
-        System.out.println("The remaining pieces are:\n");
         try {
-            for (i = 0; i < pieces.length; i++) {
-                if (pieces[i] != null) {
-                    System.out.println((i + 1) + ". " + pieces[i].getProperties());
-                }
-            }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
+            c = (GameLogic) super.clone();
+        } catch (CloneNotSupportedException e) {
+            System.out.println("GameLogic not cloneable!");
         }
+
+        c.board = board.clone();
+        c.pieceState = pieceState.clone();
+
+        return c;
+    }
+
+    /**
+     *
+     * @param piece - the piece that will be passed to the other player(computer or human)
+     * @return true if the piece can be placed on the board, else false
+     */
+    public boolean pass(int piece) {
+        // sets the passed piece
+
+        if (piece < 0 || piece > 15) {
+            System.out.println("Error: this piece doesn't exist.");
+            return false;
+        }
+
+        if (pieceState[piece] == OFF_BOARD) {
+            passedPiece = piece;
+            pieceState[piece] = IN_LIMBO;      // put this piece in limbo
+            nRemPieces--;
+
+            return true;
+        } else {
+            System.out.println("Error passing " + piece + ". Piece is " + ((pieceState[piece] == IN_LIMBO) ? "in-limbo" : "in-play") + ".");
+            return false;
+        }
+    }
+
+    /**
+     *
+     * @param spot - position in which the piece is asked to be placed
+     * @return true if the piece is placed at the wanted spot, else false
+     */
+    public boolean play(int spot) {
+        // sets the board at spot to the current passed piece
+
+        if (spot < 16 && spot >= 0) {
+            if (board[spot] != 16) {
+                // this spot not empty
+                System.out.println("Error: Spot " + spot + " not empty (contains piece " + board[spot] + ").");
+                return false;
+            } else if (pieceState[passedPiece] == OFF_BOARD || pieceState[passedPiece] == IN_PLAY) {
+                // problem with the passedPiece
+                System.out.println("Error: Piece " + passedPiece + " status is " + ((pieceState[passedPiece] == OFF_BOARD) ? "off-board" : "in-play") + ".");
+                return false;
+            } else {
+                board[spot] = passedPiece;
+                pieceState[passedPiece] = IN_PLAY;
+                nRemSpots--;
+                passedPiece = 16;
+
+                return true;
+            }
+        } else {
+            System.out.println("Bad arg passed to move(): " + spot + " out of bounds.");
+            return false;
+        }
+    }
+
+    /**
+     *
+     * @param spot - position in which the piece is placed
+     * @return true if the game is over
+     */
+    public boolean isWin(int spot) {
+        boolean checkRow = true;
+        boolean checkCol = true;
+
+        int rowhead = spot - (spot % 4);
+        int colhead = spot % 4;
+
+        int firstRow = board[rowhead], secondRow = board[rowhead + 1],
+                thirdRow = board[rowhead + 2], forthRow = board[rowhead + 3];
+
+        int firstColumn = board[colhead], secondColumn = board[colhead + 4],
+                thirdColumn = board[colhead + 8], forthColumn = board[colhead + 12];
+
+        // check for empty spots in row or column
+        if (firstRow == 16 || secondRow == 16 ||
+                thirdRow == 16 || forthRow == 16) {
+            checkRow = false;
+        }
+        if (firstColumn == 16 || secondColumn == 16 ||
+                thirdColumn == 16 || forthColumn == 16) {
+            checkCol = false;
+        }
+        if (!checkRow && !checkCol) {
+            return false;
+        }
+
+        // no empty spots, start comparing pieces in row and col
+        int result;
+
+        // check rows
+        if (checkRow) {
+            result = Piece.comparePieces(firstRow, secondRow, thirdRow, forthRow);
+            if (result < 4)
+                return true;
+        }
+
+        // check columns
+        if (checkCol) {
+            result = Piece.comparePieces(firstColumn, secondColumn, thirdColumn, forthColumn);
+            if (result < 4)
+                return true;
+        }
+
+        // nothing found - game isn't over
+        return false;
+    }
+
+    /**
+     *
+     * @return an array of the remaining spots
+     */
+    public int[] getRemainingSpots() {
+        int[] remainingSpotsArray = new int[nRemSpots];
+
+        int m = 0;
+        for (int i = 0; i < 16; i++) {
+            if (board[i] == 16) {
+                remainingSpotsArray[m] = i;
+                m++;
+            }
+        }
+
+        return remainingSpotsArray;
+    }
+
+    /**
+     *
+     * @return an array of the remaining pieces id
+     */
+    public int[] getRemainingPieces() {
+        int[] remainingPiecesArray = new int[nRemPieces];
+
+        int m = 0;
+        for (int i = 0; i < 16; i++) {
+            if (pieceState[i] == OFF_BOARD) {
+                remainingPiecesArray[m] = i;
+                m++;
+            }
+        }
+
+        return remainingPiecesArray;
+    }
+    /**
+     *
+     * @return passed piece id
+     */
+    public int getPassedPiece() {
+        return passedPiece;
+    }
+
+    /**
+     *
+     * @return number of remaining spots
+     */
+    public int getNumRemSpots() {
+        return nRemSpots;
+    }
+
+    /**
+     *
+     * @return number of remaining pieces
+     */
+    public int getNumRemPieces() {
+        return nRemPieces;
+    }
+
+    /**
+     *
+     * @param spot - Piece's position on board
+     * @return Piece's id
+     */
+    public int getPieceAt(int spot) {
+        return board[spot];
+    }
+
+    /**
+     *
+     * @param piece - Piece's id
+     * @return the Piece's status
+     */
+    public int getPieceStatus(int piece) {
+        return pieceState[piece];
+    }
+
+    public void clearBoard() {
+        Arrays.fill(board, 16);   // 16 -> empty
+        Arrays.fill(pieceState, OFF_BOARD);
+        nRemSpots = 16;
+        nRemPieces = 16;
+        passedPiece = 16;
+    }
+
+    public void initRandomBoard() {
+        // init random board and update pmat and counters
+        // user has just played piece 5 to spot 4, and must choose a piece to pass
+
+        // random board (with no quartos!)
+        int[] randboard = {12, 16, 3, 16,
+                5, 8, 16, 9,
+                16, 7, 1, 13,
+                0, 11, 16, 4};
+        System.arraycopy(randboard, 0, board, 0, 16);
+
+        // update pieceState - all pieces in play except 2, 10, 14, 15
+        for (int i = 0; i < 16; i++) {
+            pieceState[i] = IN_PLAY;
+        }
+        pieceState[2] = 0;
+        pieceState[6] = 0;
+        pieceState[10] = 0;
+        pieceState[14] = 0;
+        pieceState[15] = 0;
+
+        // update counters
+        nRemSpots = 5;
+        nRemPieces = 5;
+
+        // user has not passed yet
+        passedPiece = 16;
     }
 }
